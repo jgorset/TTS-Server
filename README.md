@@ -62,7 +62,7 @@ make run
   {
     "text": "Hello, world!",
     "reverb_room_size": 0.35,
-    "delay_time": 0.5,
+    "delay_seconds": 0.5,
     // Other audio effects, see the code for details
   }
   ```
