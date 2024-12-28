@@ -6,15 +6,11 @@
 
 See [output.wav](output.wav) for an example of the generated speech.
 
----
-
 ## Features
 
 - **High-Quality TTS**: Powered by Microsoft's SpeechT5 models for text-to-speech generation.
 - **Audio Effects (Optional)**: Apply pitch shifting and reverb using Pedalboard for enhanced audio processing.
 - **GPU Support**: Offloads intensive computations to GPU for improved performance.
-
----
 
 ## Requirements
 
@@ -39,8 +35,6 @@ See [output.wav](output.wav) for an example of the generated speech.
    pip install pedalboard
    ```
 
----
-
 ## Configuration
 
 ### Environment Variables
@@ -52,7 +46,6 @@ See [output.wav](output.wav) for an example of the generated speech.
 | `REVERB_ROOM_SIZE`        | `0.35`      | Room size for reverb (float).                |
 | `REVERB_DAMPING`          | `0.5`       | Damping factor for reverb (float).           |
 
----
 
 ## Usage
 
@@ -90,8 +83,6 @@ make run
        -d '{"text": "Hello, world!"}' --output output.wav
   ```
 
----
-
 ## Optional Audio Effects
 
 Enable audio processing by setting `PROCESS_SOUND=true` in the environment. Effects include:
@@ -99,13 +90,9 @@ Enable audio processing by setting `PROCESS_SOUND=true` in the environment. Effe
 1. **Pitch Shift**: Adjusts the pitch of the audio by the specified semitones.
 2. **Reverb**: Adds a reverberation effect with configurable room size and damping.
 
----
-
 ## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request with your improvements.
-
----
 
 ## License
 
