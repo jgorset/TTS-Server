@@ -10,6 +10,7 @@ from io import BytesIO
 from fastapi.responses import StreamingResponse
 from pedalboard import Pedalboard, PitchShift, Reverb, Delay, Chorus, Distortion, LowpassFilter, HighpassFilter
 from num2words import num2words
+import re
 
 # Define the FastAPI app
 debug = os.environ.get("DEBUG", False) == "true"
@@ -50,17 +51,26 @@ class TextToSpeechRequest(BaseModel):
 @app.post("/generate-speech")
 async def generate_speech_endpoint(request: TextToSpeechRequest):
     text = request.text
+
+    if not text:
+        raise HTTPException(status_code=400, detail="Text input is required.")
+    
+    # If the number is a float, convert it to digits separated by the word "point"
+    for word in text.split():
+        if "." in word:
+            parts = word.split(".")
+            if parts[0].isnumeric() and parts[1].isnumeric():
+                converted_word = num2words(parts[0]) + " point " + num2words(parts[1])
+                text = text.replace(word, converted_word)
     
     # The model does not work well with numbers, so extract numbers and convert them to text
     for word in text.split():
         if word.isnumeric():
             converted_word = num2words(word)
-            # num2words uses hyphens sometimes, which the model makes into longer breaks
-            converted_word = converted_word.replace("-", " ")
             text = text.replace(word, converted_word)
-
-    if not text:
-        raise HTTPException(status_code=400, detail="Text input is required.")
+            
+    # The model does not work well with hyphens in words, so replace them with spaces
+    text = re.sub(r'(?<=[a-zA-Z])-(?=[a-zA-Z])', ' ', text)
 
     try:
         # Prepare inputs
