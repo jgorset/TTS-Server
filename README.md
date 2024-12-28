@@ -74,13 +74,6 @@ make run
        -d '{"text": "Hello, world!"}' --output output.wav
   ```
 
-## Optional Audio Effects
-
-Enable audio processing by setting `PROCESS_SOUND=true` in the environment. Effects include:
-
-1. **Pitch Shift**: Adjusts the pitch of the audio by the specified semitones.
-2. **Reverb**: Adds a reverberation effect with configurable room size and damping.
-
 ## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request with your improvements.
