@@ -38,8 +38,8 @@ except Exception as e:
 class TextToSpeechRequest(BaseModel):
     text: str
     pitch_shift_semitones: int = 0  # Default no pitch shift
-    reverb_room_size: float = 0.35  # Default room size
-    reverb_damping: float = 0.5  # Default damping
+    reverb_room_size: float = 0.0  # Default room size
+    reverb_damping: float = 0.0  # Default damping
     delay_seconds: float = 0.0  # Default no delay
     chorus_rate: float = 0.0  # Default no chorus
     distortion_gain_db: float = 0.0  # Default no distortion
