@@ -110,6 +110,11 @@ async def generate_speech_endpoint(request: TextToSpeechRequest):
 
         processed_audio = processed_audio[:end_index]
 
+        # Normalize the audio to the maximum range without clipping
+        max_amplitude = np.max(np.abs(processed_audio))
+        if max_amplitude > 0:
+            processed_audio = processed_audio / max_amplitude
+
         # Convert back to int16 for WAV format
         processed_audio_int16 = (processed_audio * 32767).astype(np.int16)
 
