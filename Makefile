@@ -1,6 +1,6 @@
 # Run server
 run:
-	@uvicorn server:app --host 0.0.0.0 --port 9000 --reload --log-level debug
+	@uvicorn server:app --host 0.0.0.0 --port 9000
 
 test:
 	@curl -X POST "http://127.0.0.1:9000/generate-speech" \
