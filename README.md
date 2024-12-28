@@ -4,6 +4,8 @@
 
 **TTS-Server** is a lightweigh Text-to-Speech (TTS) server that leverages cutting-edge AI models for natural-sounding speech synthesis.
 
+See [output.wav](output.wav) for an example of the generated speech.
+
 ---
 
 ## Features
