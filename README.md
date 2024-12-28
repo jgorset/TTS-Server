@@ -35,18 +35,6 @@ See [output.wav](output.wav) for an example of the generated speech.
    pip install pedalboard
    ```
 
-## Configuration
-
-### Environment Variables
-
-| Variable                  | Default     | Description                                   |
-|---------------------------|-------------|-----------------------------------------------|
-| `PROCESS_SOUND`           | `false`     | Enable audio processing (e.g., pitch/reverb). |
-| `PITCH_SHIFT_SEMITONES`   | `0`         | Pitch shift semitones (integer).             |
-| `REVERB_ROOM_SIZE`        | `0.35`      | Room size for reverb (float).                |
-| `REVERB_DAMPING`          | `0.5`       | Damping factor for reverb (float).           |
-
-
 ## Usage
 
 ### Starting the Server
@@ -72,7 +60,10 @@ make run
 - **Request Body**:
   ```json
   {
-    "text": "Hello, world!"
+    "text": "Hello, world!",
+    "reverb_room_size": 0.35,
+    "delay_time": 0.5,
+    // Other audio effects, see the code for details
   }
   ```
 - **Response**: Returns a WAV audio file as a streaming response.

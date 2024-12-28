@@ -8,19 +8,12 @@ import torch
 import numpy as np
 from io import BytesIO
 from fastapi.responses import StreamingResponse
-
-# Environment configuration
-USE_PEDALBOARD = os.environ.get("PROCESS_SOUND", "false").lower() == "true"
-
-if USE_PEDALBOARD:
-    from pedalboard import Pedalboard, PitchShift, Reverb
-
-    PITCH_SHIFT_SEMITONES = int(os.environ.get("PITCH_SHIFT_SEMITONES", 0))
-    REVERB_ROOM_SIZE = float(os.environ.get("REVERB_ROOM_SIZE", 0.35))
-    REVERB_DAMPING = float(os.environ.get("REVERB_DAMPING", 0.5))
+from pedalboard import Pedalboard, PitchShift, Reverb, Delay, Chorus, Distortion, LowpassFilter, HighpassFilter
 
 # Define the FastAPI app
-app = FastAPI()
+debug = os.environ.get("DEBUG", False) == "true"
+
+app = FastAPI(debug=debug)
 
 # Add CORS middleware to allow all origins
 app.add_middleware(
@@ -44,11 +37,19 @@ except Exception as e:
 # Request schema
 class TextToSpeechRequest(BaseModel):
     text: str
+    pitch_shift_semitones: int = 0  # Default no pitch shift
+    reverb_room_size: float = 0.35  # Default room size
+    reverb_damping: float = 0.5  # Default damping
+    delay_seconds: float = 0.0  # Default no delay
+    chorus_rate: float = 0.0  # Default no chorus
+    distortion_gain_db: float = 0.0  # Default no distortion
+    lowpass_cutoff: float = 0.0  # Default no lowpass filter
+    highpass_cutoff: float = 0.0  # Default no highpass filter
 
 @app.post("/generate-speech")
 async def generate_speech_endpoint(request: TextToSpeechRequest):
     text = request.text
-    
+
     if not text:
         raise HTTPException(status_code=400, detail="Text input is required.")
 
@@ -65,15 +66,49 @@ async def generate_speech_endpoint(request: TextToSpeechRequest):
         # Scale to float32 for optional Pedalboard processing
         speech_float32 = speech_np.astype(np.float32)
 
-        if USE_PEDALBOARD:
-            # Apply effects using Pedalboard
-            board = Pedalboard([
-                PitchShift(semitones=PITCH_SHIFT_SEMITONES),
-                Reverb(room_size=REVERB_ROOM_SIZE, damping=REVERB_DAMPING),
-            ])
+        # Add padding for effects tails
+        max_tail_duration = max(request.delay_seconds, request.reverb_room_size * 2)  # Estimate reverb tail length
+        padding_samples = int(max_tail_duration * 16000)  # Assuming a sample rate of 16 kHz
+        speech_float32 = np.pad(speech_float32, (0, padding_samples), mode='constant')
+
+        effects = []
+
+        if request.pitch_shift_semitones != 0:
+            effects.append(PitchShift(semitones=request.pitch_shift_semitones))
+
+        if request.reverb_room_size > 0 or request.reverb_damping > 0:
+            effects.append(Reverb(room_size=request.reverb_room_size, damping=request.reverb_damping))
+
+        if request.delay_seconds > 0:
+            effects.append(Delay(delay_seconds=request.delay_seconds))
+
+        if request.chorus_rate > 0:
+            effects.append(Chorus(rate_hz=request.chorus_rate))
+
+        if request.distortion_gain_db > 0:
+            effects.append(Distortion(gain_db=request.distortion_gain_db))
+
+        if request.lowpass_cutoff > 0:
+            effects.append(LowpassFilter(cutoff_frequency_hz=request.lowpass_cutoff))
+
+        if request.highpass_cutoff > 0:
+            effects.append(HighpassFilter(cutoff_frequency_hz=request.highpass_cutoff))
+
+        if effects:
+            board = Pedalboard(effects)
             processed_audio = board.process(speech_float32, sample_rate=16000)
         else:
             processed_audio = speech_float32
+
+        # Trim silence from the end (if necessary)
+        threshold = 0.001  # Adjust threshold as needed
+        end_index = len(processed_audio)
+        for i in reversed(range(len(processed_audio))):
+            if abs(processed_audio[i]) > threshold:
+                end_index = i + 1
+                break
+
+        processed_audio = processed_audio[:end_index]
 
         # Convert back to int16 for WAV format
         processed_audio_int16 = (processed_audio * 32767).astype(np.int16)
