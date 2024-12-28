@@ -100,8 +100,13 @@ async def generate_speech_endpoint(request: TextToSpeechRequest):
         else:
             processed_audio = speech_float32
 
+        # Normalize the audio to the maximum range without clipping
+        max_amplitude = np.max(np.abs(processed_audio))
+        if max_amplitude > 0:
+            processed_audio = processed_audio / max_amplitude
+            
         # Trim silence from the end (if necessary)
-        threshold = 0.001  # Adjust threshold as needed
+        threshold = 0.0001  # Adjust threshold as needed
         end_index = len(processed_audio)
         for i in reversed(range(len(processed_audio))):
             if abs(processed_audio[i]) > threshold:
@@ -109,11 +114,6 @@ async def generate_speech_endpoint(request: TextToSpeechRequest):
                 break
 
         processed_audio = processed_audio[:end_index]
-
-        # Normalize the audio to the maximum range without clipping
-        max_amplitude = np.max(np.abs(processed_audio))
-        if max_amplitude > 0:
-            processed_audio = processed_audio / max_amplitude
 
         # Convert back to int16 for WAV format
         processed_audio_int16 = (processed_audio * 32767).astype(np.int16)
