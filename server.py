@@ -9,6 +9,7 @@ import numpy as np
 from io import BytesIO
 from fastapi.responses import StreamingResponse
 from pedalboard import Pedalboard, PitchShift, Reverb, Delay, Chorus, Distortion, LowpassFilter, HighpassFilter
+from num2words import num2words
 
 # Define the FastAPI app
 debug = os.environ.get("DEBUG", False) == "true"
@@ -49,6 +50,14 @@ class TextToSpeechRequest(BaseModel):
 @app.post("/generate-speech")
 async def generate_speech_endpoint(request: TextToSpeechRequest):
     text = request.text
+    
+    # The model does not work well with numbers, so extract numbers and convert them to text
+    for word in text.split():
+        if word.isnumeric():
+            converted_word = num2words(word)
+            # num2words uses hyphens sometimes, which the model makes into longer breaks
+            converted_word = converted_word.replace("-", " ")
+            text = text.replace(word, converted_word)
 
     if not text:
         raise HTTPException(status_code=400, detail="Text input is required.")
