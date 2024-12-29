@@ -5,7 +5,7 @@ run:
 test:
 	@curl -X POST "http://127.0.0.1:9000/generate-speech" \
 		-H "Content-Type: application/json" \
-     	-d '{"text": "Hello, this is a test of the text-to-speech system."}' \
+     	-d '{"text": "Hello, this is a test of the text to speech system."}' \
      	--output output.wav
 
 test-numbers:
@@ -18,5 +18,5 @@ test-numbers:
 test-with-effects:
 	@curl -X POST "http://127.0.0.1:9000/generate-speech" \
 		-H "Content-Type: application/json" \
-     	-d '{ "reverb_room_size": 0.35, "text": "Hello, this is a test of the text-to-speech system." }' \
+     	-d '{ "reverb_room_size": 0.35, "text": "Hello, this is a test of the text to speech system." }' \
      	--output output.wav
