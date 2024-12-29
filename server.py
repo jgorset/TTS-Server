@@ -71,6 +71,9 @@ async def generate_speech_endpoint(request: TextToSpeechRequest):
             
     # The model does not work well with hyphens in words, so replace them with spaces
     text = re.sub(r'(?<=[a-zA-Z])-(?=[a-zA-Z])', ' ', text)
+    
+    # The model does not leave a pause after an ellipsis, but a hyphen will sound right
+    text = text.replace("...", " - ")
 
     try:
         # Prepare inputs
